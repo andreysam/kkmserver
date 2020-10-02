@@ -11,51 +11,41 @@ import DeviceSearch, { DeviceSearchResult } from './models/DeviceSearch';
 async function sendCommand(
   name: 'CloseShift',
   params?: Pick<CommandParams, 'NotPrint'>,
-  ignoreSettings?: boolean
+  customSettings?: unknown
 ): Promise<CloseShiftResult>;
 async function sendCommand(
   name: 'OpenShift',
   params?: Pick<CommandParams, 'NotPrint'>,
-  ignoreSettings?: boolean
+  customSettings?: unknown
 ): Promise<OpenShiftResult>;
 async function sendCommand(
   name: 'List',
   params?: DeviceSearch,
-  ignoreSettings?: boolean
+  customSettings?: unknown
 ): Promise<DeviceSearchResult>;
 async function sendCommand(
   name: 'RegisterCheck',
   params: CommandParams,
-  ignoreSettings?: boolean
+  customSettings?: unknown
 ): Promise<RegisterCheckResult>;
-async function sendCommand(name: string, params = {}, ignoreSettings = false) {
-  let KKMSettings = {
+async function sendCommand(
+  name: string,
+  params = {},
+  customSettings = {
     cashierName: 'касса',
     cashierVATIN: '',
     serverAddress: 'http://localhost:5893/Execute',
     device: 0,
     auth: { username: 'User', password: '' }
-  };
-
-  if (!ignoreSettings) {
-    try {
-      const settingsString = localStorage.getItem('kkmSettings');
-
-      if (settingsString) {
-        KKMSettings = JSON.parse(settingsString);
-      }
-    } catch (e) {
-      console.error(e);
-    }
   }
-
+) {
   const {
     cashierName = 'касса',
     cashierVATIN = '',
     serverAddress = 'http://localhost:5893/Execute',
     device = 0,
     auth = { username: 'User', password: '' }
-  } = KKMSettings;
+  } = customSettings;
 
   if (typeof params === 'object') {
     const { data } = await axios.post(
@@ -77,32 +67,47 @@ async function sendCommand(name: string, params = {}, ignoreSettings = false) {
   return null;
 }
 
+interface CustomKKMSettings {
+  cashierName?: string;
+  cashierVATIN?: string;
+  serverAddress?: string;
+  device?: number;
+  auth?: {
+    username: string;
+    password: string;
+  };
+}
+
 export async function getDevices(
-  search: DeviceSearch = {}
+  search: DeviceSearch = {},
+  kkmSettings: CustomKKMSettings = {}
 ): Promise<DeviceSearchResult> {
-  const data = await sendCommand('List', search, true);
+  const data = await sendCommand('List', search, kkmSettings);
 
   return data;
 }
 
 export async function openShift(
-  params: Pick<CommandParams, 'NotPrint'> = {}
+  params: Pick<CommandParams, 'NotPrint'> = {},
+  kkmSettings: CustomKKMSettings = {}
 ): Promise<OpenShiftResult> {
-  const data = await sendCommand('OpenShift', params);
+  const data = await sendCommand('OpenShift', params, kkmSettings);
 
   return data;
 }
 
 export async function closeShift(
-  params: Pick<CommandParams, 'NotPrint'> = {}
+  params: Pick<CommandParams, 'NotPrint'> = {},
+  kkmSettings: CustomKKMSettings = {}
 ): Promise<CloseShiftResult> {
-  const data = await sendCommand('CloseShift', params);
+  const data = await sendCommand('CloseShift', params, kkmSettings);
 
   return data;
 }
 
 export async function printCheck(
-  params: CommandParams
+  params: CommandParams,
+  kkmSettings: CustomKKMSettings = {}
 ): Promise<RegisterCheckResult> {
-  return sendCommand('RegisterCheck', params);
+  return sendCommand('RegisterCheck', params, kkmSettings);
 }
