@@ -1,6 +1,6 @@
 {
   "name": "kkmserver",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Библиотека для работы с кассой через web-сервер АТОЛ",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
