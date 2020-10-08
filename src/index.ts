@@ -141,5 +141,3 @@ export async function getKKTData(
     return Promise.reject(new Error('kkm error'));
   }
 }
-
-getKKTData().then(console.log);
