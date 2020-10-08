@@ -11,6 +11,16 @@ import KKTDataResult from './models/KKTData';
 import StatusCodeEnum from './models/StatusCodeEnum';
 
 async function sendCommand(
+  name: 'DepositingCash' | 'PaymentCash',
+  params: { Amount: number },
+  customSettings?: unknown
+): Promise<void>;
+async function sendCommand(
+  name: 'XReport',
+  params?: Record<string, unknown>,
+  customSettings?: unknown
+): Promise<void>;
+async function sendCommand(
   name: 'GetDataKKT',
   params?: Record<string, unknown>,
   customSettings?: unknown
@@ -140,4 +150,24 @@ export async function getKKTData(
   } catch (e) {
     return Promise.reject(new Error('kkm error'));
   }
+}
+
+export async function getXReport(
+  kkmSettings: CustomKKMSettings = {}
+): Promise<void> {
+  await sendCommand('XReport', {}, kkmSettings);
+}
+
+export async function depositCash(
+  amount: number,
+  kkmSettings: CustomKKMSettings = {}
+): Promise<void> {
+  await sendCommand('DepositingCash', { Amount: amount }, kkmSettings);
+}
+
+export async function payCash(
+  amount: number,
+  kkmSettings: CustomKKMSettings = {}
+): Promise<void> {
+  await sendCommand('PaymentCash', { Amount: amount }, kkmSettings);
 }
