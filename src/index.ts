@@ -7,7 +7,14 @@ import CommandParams, {
   RegisterCheckResult
 } from './models/Command';
 import DeviceSearch, { DeviceSearchResult } from './models/DeviceSearch';
+import KKTDataResult from './models/KKTData';
+import StatusCodeEnum from './models/StatusCodeEnum';
 
+async function sendCommand(
+  name: 'GetDataKKT',
+  params?: Record<string, unknown>,
+  customSettings?: unknown
+): Promise<KKTDataResult>;
 async function sendCommand(
   name: 'CloseShift',
   params?: Pick<CommandParams, 'NotPrint'>,
@@ -36,7 +43,8 @@ async function sendCommand(
     cashierVATIN: '',
     serverAddress: 'http://localhost:5893/Execute',
     device: 0,
-    auth: { username: 'User', password: '' }
+    auth: { username: 'User', password: '' },
+    timeout: 0
   }
 ) {
   const {
@@ -44,7 +52,8 @@ async function sendCommand(
     cashierVATIN = '',
     serverAddress = 'http://localhost:5893/Execute',
     device = 0,
-    auth = { username: 'User', password: '' }
+    auth = { username: 'User', password: '' },
+    timeout = 0
   } = customSettings;
 
   if (typeof params === 'object') {
@@ -58,7 +67,7 @@ async function sendCommand(
         CashierName: cashierName,
         CashierVATIN: cashierVATIN
       },
-      { auth }
+      { auth, timeout }
     );
 
     return data;
@@ -76,6 +85,7 @@ interface CustomKKMSettings {
     username: string;
     password: string;
   };
+  timeout?: number;
 }
 
 export async function getDevices(
@@ -111,3 +121,25 @@ export async function printCheck(
 ): Promise<RegisterCheckResult> {
   return sendCommand('RegisterCheck', params, kkmSettings);
 }
+
+export async function getKKTData(
+  kkmSettings: CustomKKMSettings = {}
+): Promise<KKTDataResult> {
+  try {
+    const data = await sendCommand(
+      'GetDataKKT',
+      {},
+      { timeout: 5000, ...kkmSettings }
+    );
+
+    if (data.Status === StatusCodeEnum.ok) {
+      return data;
+    } else {
+      throw new Error('not ok');
+    }
+  } catch (e) {
+    return Promise.reject(new Error('kkm error'));
+  }
+}
+
+getKKTData().then(console.log);
