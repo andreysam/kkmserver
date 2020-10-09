@@ -129,7 +129,14 @@ export async function printCheck(
   params: CommandParams,
   kkmSettings: CustomKKMSettings = {}
 ): Promise<RegisterCheckResult> {
-  return sendCommand('RegisterCheck', params, kkmSettings);
+  const data = await sendCommand('RegisterCheck', params, kkmSettings);
+
+  if (data.Status === 2 && data.Error.includes('68')) {
+    await closeShift({ NotPrint: params.NotPrint }, kkmSettings);
+    return sendCommand('RegisterCheck', params, kkmSettings);
+  }
+
+  return data;
 }
 
 export async function getKKTData(
