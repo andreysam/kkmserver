@@ -136,6 +136,10 @@ export async function printCheck(
     return sendCommand('RegisterCheck', params, kkmSettings);
   }
 
+  if (data.Error.includes('лицензии')) {
+    return sendCommand('RegisterCheck', params, kkmSettings);
+  }
+
   return data;
 }
 
