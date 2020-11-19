@@ -131,12 +131,12 @@ export async function printCheck(
 ): Promise<RegisterCheckResult> {
   const data = await sendCommand('RegisterCheck', params, kkmSettings);
 
-  if (data.Status === 2 && data.Error.includes('68')) {
+  if (data.Status === 2 && data.Error.includes('смена')) {
     await closeShift({ NotPrint: params.NotPrint }, kkmSettings);
     return sendCommand('RegisterCheck', params, kkmSettings);
   }
 
-  if (data.Error.includes('лицензии')) {
+  if (data.Error.includes('лиценз')) {
     return sendCommand('RegisterCheck', params, kkmSettings);
   }
 

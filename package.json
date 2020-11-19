@@ -1,6 +1,6 @@
 {
   "name": "kkmserver",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Библиотека для работы с торговым оборудованием через kkmserver",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
