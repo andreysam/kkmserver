@@ -189,3 +189,26 @@ export async function payCash(
 ): Promise<void> {
   await sendCommand('PaymentCash', { Amount: amount }, kkmSettings);
 }
+
+printCheck(
+  {
+    IsFiscalCheck: true,
+    TypeCheck: 0,
+    CheckStrings: [
+      {
+        Register: {
+          Name:
+            'B01.031.001  - Прием (осмотр, консультация) врача-педиатра первичный',
+          Price: 800,
+          Quantity: 1,
+          Amount: 800,
+          Tax: -1,
+          SignCalculationObject: 4,
+          SignMethodCalculation: 4
+        }
+      }
+    ],
+    ElectronicPayment: 800
+  },
+  { cashierName: 'Рудакова Юлия  Петровна', cashierVATIN: '' }
+);
