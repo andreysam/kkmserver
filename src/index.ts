@@ -132,8 +132,8 @@ export async function printCheck(
   const data = await sendCommand('RegisterCheck', params, kkmSettings);
 
   if (
-    (data.Status !== StatusCodeEnum.ok && data.Error.includes('смена')) ||
-    data.Error.includes('Смена')
+    data.Status !== StatusCodeEnum.ok &&
+    (data.Error.includes('смена') || data.Error.includes('Смена'))
   ) {
     await closeShift({ NotPrint: params.NotPrint }, kkmSettings);
     return sendCommand('RegisterCheck', params, kkmSettings);
