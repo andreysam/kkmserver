@@ -1,8 +1,9 @@
 enum StatusCodeEnum {
   ok,
   run,
-  'not found',
-  'not run'
+  error,
+  notFound,
+  notRun
 }
 
 export default StatusCodeEnum;

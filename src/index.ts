@@ -10,72 +10,70 @@ import DeviceSearch, { DeviceSearchResult } from './models/DeviceSearch';
 import KKTDataResult from './models/KKTData';
 import StatusCodeEnum from './models/StatusCodeEnum';
 
+interface Options {
+  /** @default 'http://localhost:5893/Execute' */
+  address?: string;
+  /** @default 0 */
+  device?: number;
+  /** @default { username: 'User', password: '' } */
+  auth?: { username: string; password: string };
+  /** @default 0 */
+  timeout?: number;
+}
+
 async function sendCommand(
   name: 'DepositingCash' | 'PaymentCash',
   params: { Amount: number },
-  customSettings?: unknown
+  options?: Options
 ): Promise<void>;
 async function sendCommand(
   name: 'XReport',
   params?: Record<string, unknown>,
-  customSettings?: unknown
+  options?: Options
 ): Promise<void>;
 async function sendCommand(
   name: 'GetDataKKT',
   params?: Record<string, unknown>,
-  customSettings?: unknown
+  options?: Options
 ): Promise<KKTDataResult>;
 async function sendCommand(
   name: 'CloseShift',
   params?: Pick<CommandParams, 'NotPrint'>,
-  customSettings?: unknown
+  options?: Options
 ): Promise<CloseShiftResult>;
 async function sendCommand(
   name: 'OpenShift',
   params?: Pick<CommandParams, 'NotPrint'>,
-  customSettings?: unknown
+  options?: Options
 ): Promise<OpenShiftResult>;
 async function sendCommand(
   name: 'List',
   params?: DeviceSearch,
-  customSettings?: unknown
+  options?: Options
 ): Promise<DeviceSearchResult>;
 async function sendCommand(
   name: 'RegisterCheck',
   params: CommandParams,
-  customSettings?: unknown
+  options?: Options
 ): Promise<RegisterCheckResult>;
-async function sendCommand(
-  name: string,
-  params = {},
-  customSettings = {
-    cashierName: 'касса',
-    cashierVATIN: '',
-    serverAddress: 'http://localhost:5893/Execute',
-    device: 0,
-    auth: { username: 'User', password: '' },
-    timeout: 0
-  }
-) {
+async function sendCommand(name: string, params = {}, options: Options = {}) {
   const {
-    cashierName = 'касса',
-    cashierVATIN = '',
-    serverAddress = 'http://localhost:5893/Execute',
+    address = 'http://localhost:5893/Execute',
     device = 0,
     auth = { username: 'User', password: '' },
     timeout = 0
-  } = customSettings;
+  } = options;
 
   if (typeof params === 'object') {
     const { data } = await axios.post(
-      serverAddress,
+      address,
       {
+        CashierName: 'касса',
+        CashierVATIN: '',
         ...params,
         Command: name,
         NumDevice: device,
-        IdCommand: v4(),
-        CashierName: cashierName,
-        CashierVATIN: cashierVATIN
+        IdCommand: v4()
       },
       { auth, timeout }
     );
@@ -86,61 +84,49 @@ async function sendCommand(
   return null;
 }
 
-interface CustomKKMSettings {
-  cashierName?: string;
-  cashierVATIN?: string;
-  serverAddress?: string;
-  device?: number;
-  auth?: {
-    username: string;
-    password: string;
-  };
-  timeout?: number;
-}
-
 export async function getDevices(
   search: DeviceSearch = {},
-  kkmSettings: CustomKKMSettings = {}
+  options: Options = {}
 ): Promise<DeviceSearchResult> {
-  const data = await sendCommand('List', search, kkmSettings);
+  const data = await sendCommand('List', search, options);
 
   return data;
 }
 
 export async function openShift(
   params: Pick<CommandParams, 'NotPrint'> = {},
-  kkmSettings: CustomKKMSettings = {}
+  options: Options = {}
 ): Promise<OpenShiftResult> {
-  const data = await sendCommand('OpenShift', params, kkmSettings);
+  const data = await sendCommand('OpenShift', params, options);
 
   return data;
 }
 
 export async function closeShift(
   params: Pick<CommandParams, 'NotPrint'> = {},
-  kkmSettings: CustomKKMSettings = {}
+  options: Options = {}
 ): Promise<CloseShiftResult> {
-  const data = await sendCommand('CloseShift', params, kkmSettings);
+  const data = await sendCommand('CloseShift', params, options);
 
   return data;
 }
 
 export async function printCheck(
   params: CommandParams,
-  kkmSettings: CustomKKMSettings = {}
+  options: Options = {}
 ): Promise<RegisterCheckResult> {
-  const data = await sendCommand('RegisterCheck', params, kkmSettings);
+  const data = await sendCommand('RegisterCheck', params, options);
 
   if (
     data.Status !== StatusCodeEnum.ok &&
     (data.Error.includes('смена') || data.Error.includes('Смена'))
   ) {
-    await closeShift({ NotPrint: params.NotPrint }, kkmSettings);
-    return sendCommand('RegisterCheck', params, kkmSettings);
+    await closeShift({ NotPrint: params.NotPrint }, options);
+    return sendCommand('RegisterCheck', params, options);
   }
 
   if (data.Error.includes('лиценз')) {
-    return sendCommand('RegisterCheck', params, kkmSettings);
+    return sendCommand('RegisterCheck', params, options);
   }
 
   if (data.Status !== StatusCodeEnum.ok) {
@@ -151,13 +137,13 @@ export async function printCheck(
 }
 
 export async function getKKTData(
-  kkmSettings: CustomKKMSettings = {}
+  options: Options = {}
 ): Promise<KKTDataResult> {
   try {
     const data = await sendCommand(
       'GetDataKKT',
       {},
-      { timeout: 5000, ...kkmSettings }
+      { timeout: 5000, ...options }
     );
 
     if (data.Status === StatusCodeEnum.ok) {
@@ -170,22 +156,20 @@ export async function getKKTData(
   }
 }
 
-export async function getXReport(
-  kkmSettings: CustomKKMSettings = {}
-): Promise<void> {
-  await sendCommand('XReport', {}, kkmSettings);
+export async function getXReport(options: Options = {}): Promise<void> {
+  await sendCommand('XReport', {}, options);
 }
 
 export async function depositCash(
   amount: number,
-  kkmSettings: CustomKKMSettings = {}
+  options: Options = {}
 ): Promise<void> {
-  await sendCommand('DepositingCash', { Amount: amount }, kkmSettings);
+  await sendCommand('DepositingCash', { Amount: amount }, options);
 }
 
 export async function payCash(
   amount: number,
-  kkmSettings: CustomKKMSettings = {}
+  options: Options = {}
 ): Promise<void> {
-  await sendCommand('PaymentCash', { Amount: amount }, kkmSettings);
+  await sendCommand('PaymentCash', { Amount: amount }, options);
 }

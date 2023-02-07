@@ -1,55 +1,8 @@
 {
   "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "project": "tsconfig.json",
-    "sourceType": "module"
-  },
-  "plugins": ["prettier", "@typescript-eslint/eslint-plugin"],
+  "plugins": ["prettier"],
   "extends": [
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier/@typescript-eslint",
-    "plugin:prettier/recommended",
-    "plugin:import/errors",
-    "plugin:import/warnings"
-  ],
-  "root": true,
-  "env": {
-    "browser": true
-  },
-  "rules": {
-    "prettier/prettier": "error",
-    "global-require": 0,
-    "no-underscore-dangle": 0,
-    "curly": ["error", "all"],
-    "no-console": 0,
-    "import/extensions": [
-      "error",
-      {
-        "js": "never",
-        "ts": "never"
-      }
-    ],
-    "import/prefer-default-export": 0,
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        "devDependencies": [
-          "**/*.test.js",
-          "**/*.spec.js",
-          "**/*.test.ts",
-          "**/*.spec.ts"
-        ]
-      }
-    ],
-    "max-classes-per-file": 0,
-    "no-unused-vars": 0
-  },
-  "settings": {
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".ts"]
-      }
-    }
-  }
+    "eslint-config-prettier",
+    "plugin:prettier/recommended"
+  ]
 }
