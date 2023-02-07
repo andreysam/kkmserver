@@ -1,6 +1,12 @@
-import axios from 'axios';
-import { v4 } from 'uuid';
-
+import authorisationByPaymentCard from './acquiring/authorisationByPaymentCard';
+import cancelPaymentByPaymentCard from './acquiring/cancelPaymentByPaymentCard';
+import authConfirmationByPaymentCard from './acquiring/authConfirmationByPaymentCard';
+import parseUniversalID from './acquiring/parseUniversalID';
+import payByPaymentCard from './acquiring/payByPaymentCard';
+import returnPaymentByPaymentCard from './acquiring/returnPaymentByPaymentCard';
+import settlement from './acquiring/settlement';
+import terminalReport from './acquiring/terminalReport';
+import cancelAuthorisationByPaymentCard from './acquiring/cancelAuthorisationByPaymentCard';
 import CommandParams, {
   OpenShiftResult,
   CloseShiftResult,
@@ -9,80 +15,7 @@ import CommandParams, {
 import DeviceSearch, { DeviceSearchResult } from './models/DeviceSearch';
 import KKTDataResult from './models/KKTData';
 import StatusCodeEnum from './models/StatusCodeEnum';
-
-interface Options {
-  /** @default 'http://localhost:5893/Execute' */
-  address?: string;
-  /** @default 0 */
-  device?: number;
-  /** @default { username: 'User', password: '' } */
-  auth?: { username: string; password: string };
-  /** @default 0 */
-  timeout?: number;
-}
-
-async function sendCommand(
-  name: 'DepositingCash' | 'PaymentCash',
-  params: { Amount: number },
-  options?: Options
-): Promise<void>;
-async function sendCommand(
-  name: 'XReport',
-  params?: Record<string, unknown>,
-  options?: Options
-): Promise<void>;
-async function sendCommand(
-  name: 'GetDataKKT',
-  params?: Record<string, unknown>,
-  options?: Options
-): Promise<KKTDataResult>;
-async function sendCommand(
-  name: 'CloseShift',
-  params?: Pick<CommandParams, 'NotPrint'>,
-  options?: Options
-): Promise<CloseShiftResult>;
-async function sendCommand(
-  name: 'OpenShift',
-  params?: Pick<CommandParams, 'NotPrint'>,
-  options?: Options
-): Promise<OpenShiftResult>;
-async function sendCommand(
-  name: 'List',
-  params?: DeviceSearch,
-  options?: Options
-): Promise<DeviceSearchResult>;
-async function sendCommand(
-  name: 'RegisterCheck',
-  params: CommandParams,
-  options?: Options
-): Promise<RegisterCheckResult>;
-async function sendCommand(name: string, params = {}, options: Options = {}) {
-  const {
-    address = 'http://localhost:5893/Execute',
-    device = 0,
-    auth = { username: 'User', password: '' },
-    timeout = 0
-  } = options;
-
-  if (typeof params === 'object') {
-    const { data } = await axios.post(
-      address,
-      {
-        CashierName: 'касса',
-        CashierVATIN: '',
-        ...params,
-        Command: name,
-        NumDevice: device,
-        IdCommand: v4()
-      },
-      { auth, timeout }
-    );
-
-    return data;
-  }
-
-  return null;
-}
+import sendCommand, { Options } from './sendCommand';
 
 export async function getDevices(
   search: DeviceSearch = {},
@@ -173,3 +106,15 @@ export async function payCash(
 ): Promise<void> {
   await sendCommand('PaymentCash', { Amount: amount }, options);
 }
+
+export {
+  payByPaymentCard,
+  returnPaymentByPaymentCard,
+  cancelPaymentByPaymentCard,
+  authorisationByPaymentCard,
+  authConfirmationByPaymentCard,
+  parseUniversalID,
+  cancelAuthorisationByPaymentCard,
+  settlement,
+  terminalReport
+};
