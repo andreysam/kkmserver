@@ -11,6 +11,8 @@ export interface Options {
   auth?: { username: string; password: string };
   /** @default 0 */
   timeout?: number;
+  /** @default касса */
+  cashierName?: string;
 }
 
 async function sendCommand(name: string, params = {}, options: Options = {}) {
@@ -18,14 +20,15 @@ async function sendCommand(name: string, params = {}, options: Options = {}) {
     address = 'http://localhost:5893/Execute',
     device = 0,
     auth = { username: 'User', password: '' },
-    timeout = 0
+    timeout = 0,
+    cashierName = 'касса'
   } = options;
 
   if (typeof params === 'object') {
     const { data } = await axios.post(
       address,
       {
-        CashierName: 'касса',
+        CashierName: cashierName,
         CashierVATIN: '',
         ...params,
         Command: name,
